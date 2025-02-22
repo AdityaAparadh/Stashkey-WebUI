@@ -1,0 +1,42 @@
+import { ThemeToggle } from "../Commons/ThemeToggle";
+import { LockKeyhole, LogOut, Menu } from "lucide-react";
+import { Button } from "../ui/button";
+
+interface NavbarProps {
+  onMenuClick: () => void;
+}
+
+const Navbar = ({ onMenuClick }: NavbarProps) => {
+  return (
+    <div className="fixed top-0 left-0 right-0 border-b bg-background">
+      <div className="container px-4 sm:px-6 mx-auto">
+        <div className="flex h-14 sm:h-16 items-center justify-between max-w-full">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="md:hidden mr-2"
+              onClick={onMenuClick}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <LockKeyhole className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="font-semibold text-lg sm:text-xl hidden sm:inline">
+              Stashkey
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium">aditya</span>
+            <ThemeToggle />
+            <Button variant="outline" size="icon">
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Navbar;
