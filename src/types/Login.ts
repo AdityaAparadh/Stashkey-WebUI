@@ -1,5 +1,12 @@
 import type { Record } from "./Record";
-import type { Password } from "./Password";
+
+/**
+ * Interface for storing password with its creation date
+ */
+export interface Password {
+  password: string;
+  createdAt: Date;
+}
 
 /**
  * Interface for a Login type of record

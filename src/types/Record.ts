@@ -1,4 +1,12 @@
-import { RecordType } from "./RecordType";
+/**
+ * Enum for different types of records in the vault
+ */
+export enum RecordType {
+  LOGIN = "LOGIN",
+  IDENTITY = "IDENTITY",
+  CARD = "CARD",
+  NOTE = "NOTE",
+}
 
 /**
  * Interface for various types of records, containing common elements like uuid and notes
