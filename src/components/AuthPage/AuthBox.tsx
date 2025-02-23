@@ -8,24 +8,100 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import axios from "axios";
+import config from "../../config";
+import { createKey } from "@/utils/Key";
+import { useAuth } from "../Hooks/useAuth";
+import { usePage } from "../Hooks/usePage";
+import { PageType } from "@/types/PageType";
 
 const AuthBox = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+  const { auth, setAuth } = useAuth();
+  const { setCurrentPage } = usePage();
 
-  const onSubmit = async (
-    event: React.FormEvent,
-    type: "login" | "register",
-  ) => {
-    event.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
+    setStatus(null);
+
+    if (password.length < 8) {
+      setStatus("Password must be at least 8 characters long");
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      console.log(`${type} submission`);
-    } catch (error) {
-      console.error(error);
+      const authKey: CryptoKey = await createKey(
+        password,
+        username,
+        config.AUTH_KEY_ITERATIONS,
+        true,
+      );
+
+      const exportedAuthKey = await crypto.subtle.exportKey("jwk", authKey);
+      const authKeyString = JSON.stringify(exportedAuthKey);
+
+      await axios.post(
+        `${config.BACKEND_URI}/auth/login`,
+        {
+          username,
+          password: authKeyString,
+        },
+        { withCredentials: true },
+      );
+
+      const encryptionKey: CryptoKey = await createKey(
+        password,
+        username,
+        config.ENCRYPTION_KEY_ITERATIONS,
+        true,
+      );
+      setAuth({
+        ...auth,
+        authKey,
+        encryptionKey,
+        isAuthenticated: true,
+        username,
+      });
+
+      setCurrentPage(PageType.MAINPAGE);
+    } catch (err) {
+      console.error("Login Error:", err);
+
+      if (axios.isAxiosError(err) && err.response) {
+        switch (err.response.status) {
+          case 400:
+            setStatus("Bad Request. Please check your input.");
+            break;
+          case 401:
+            setStatus("Invalid credentials. Please try again.");
+            break;
+          case 404:
+            setStatus("User not found.");
+            break;
+          case 409:
+            setStatus("Username already taken.");
+            break;
+          case 429:
+            setStatus("Too many requests. Please try again later.");
+            break;
+          case 500:
+            setStatus("Internal Server Error. Please try again later.");
+            break;
+          default:
+            setStatus("An unexpected error occurred.");
+        }
+      } else {
+        setStatus("An unknown error occurred.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -37,7 +113,6 @@ const AuthBox = () => {
         <TabsTrigger value="login">Login</TabsTrigger>
         <TabsTrigger value="register">Register</TabsTrigger>
       </TabsList>
-
       {/* Login Tab */}
       <TabsContent value="login">
         <Card>
@@ -48,15 +123,32 @@ const AuthBox = () => {
               vault
             </CardDescription>
           </CardHeader>
-          <form onSubmit={(e) => onSubmit(e, "login")}>
+          <form onSubmit={handleLogin}>
             <CardContent className="space-y-2">
+              {status && (
+                <Alert variant="destructive">
+                  <AlertDescription>{status}</AlertDescription>
+                </Alert>
+              )}
               <div className="space-y-1">
                 <Label htmlFor="username">Username</Label>
-                <Input id="username" type="text" required />
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="masterPassword">Master Password</Label>
-                <Input id="masterPassword" type="password" required />
+                <Input
+                  id="masterPassword"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
             </CardContent>
             <CardFooter>
@@ -66,8 +158,7 @@ const AuthBox = () => {
             </CardFooter>
           </form>
         </Card>
-      </TabsContent>
-
+      </TabsContent>{" "}
       {/* Register Tab */}
       <TabsContent value="register">
         <Card>
@@ -78,7 +169,7 @@ const AuthBox = () => {
               store your information in a vault
             </CardDescription>
           </CardHeader>
-          <form onSubmit={(e) => onSubmit(e, "register")}>
+          <form onSubmit={(e) => handleLogin(e)}>
             <CardContent className="space-y-2">
               <div className="space-y-1">
                 <Label htmlFor="username">Username</Label>

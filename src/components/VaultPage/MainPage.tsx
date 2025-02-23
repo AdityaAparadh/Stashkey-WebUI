@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Navbar from "./Navbar";
 import { Button } from "../ui/button";
-import { Shield, Share2, User, KeyRound, Menu } from "lucide-react";
+import { Shield, Share2, User, KeyRound } from "lucide-react";
 import { VaultSection } from "./sections/VaultSection/VaultSection";
 import { SharingSection } from "./sections/SharingSection/SharingSection";
 import { ProtectionSection } from "./sections/ProtectionSection/ProtectionSection";
@@ -9,7 +9,7 @@ import { AccountSection } from "./sections/AccountSection/AccountSection";
 
 type Section = "vault" | "sharing" | "protection" | "account";
 
-const VaultPage = () => {
+const MainPage = () => {
   const [activeSection, setActiveSection] = useState<Section>("vault");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -103,4 +103,4 @@ const VaultPage = () => {
   );
 };
 
-export default VaultPage;
+export default MainPage;
