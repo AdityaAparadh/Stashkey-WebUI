@@ -40,7 +40,7 @@ export const getDecryptedDataFromBlob = async (
   const buffer: ArrayBuffer = await encryptedBlob.arrayBuffer();
 
   const decryptedBuffer: ArrayBuffer = await DecryptBuffer(buffer, iv, key);
-
+  console.log(decryptedBuffer);
   const data: object = BSON.deserialize(new Uint8Array(decryptedBuffer));
   const vault: Vault = data as Vault;
   return vault;

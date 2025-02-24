@@ -79,8 +79,14 @@ const LoginForm = () => {
         isAuthenticated: true,
         username,
       });
-
-      setToken(latestAuth.current, latestSetAuth.current);
+      latestAuth.current = {
+        ...auth,
+        authKey,
+        encryptionKey,
+        isAuthenticated: true,
+        username,
+      };
+      await setToken(latestAuth.current, latestSetAuth.current);
       setCurrentPage(PageType.MAINPAGE);
     } catch (err) {
       handleError(err, setStatus);

@@ -33,20 +33,6 @@ export const useVault = () => {
     });
   };
 
-  const initializeVault = (
-    username: string,
-    publicKey: string,
-    privateKey: string,
-  ) => {
-    setVault({
-      username,
-      publicKey,
-      privateKey,
-      lastModified: new Date(),
-      vaultData: null,
-    });
-  };
-
   const updateVaultData = (records: [Record]) => {
     if (!vault) return;
 
@@ -60,7 +46,7 @@ export const useVault = () => {
   return {
     vault,
     updateVault,
-    initializeVault,
     updateVaultData,
+    setVault,
   };
 };

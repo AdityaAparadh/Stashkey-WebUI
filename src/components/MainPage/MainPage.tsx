@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import { Button } from "../ui/button";
-import { Shield, Share2, User, KeyRound, Pi } from "lucide-react";
+import { Shield, Share2, User, KeyRound, Dam } from "lucide-react";
 import { VaultSection } from "./sections/VaultSection/VaultSection";
 import { SharingSection } from "./sections/SharingSection/SharingSection";
 import { ProtectionSection } from "./sections/ProtectionSection/ProtectionSection";
@@ -10,12 +10,56 @@ import config from "../../config";
 import axios from "axios";
 import { usePage } from "../Hooks/usePage";
 import { PageType } from "@/types/PageType";
+import { fetchVault } from "@/utils/FetchVault";
+import { useAuth } from "../Hooks/useAuth";
+import { getDecryptedDataFromBlob } from "@/utils/Blob";
+import { useVault } from "../Hooks/useVault";
+import setToken from "@/utils/setToken";
 type Section = "vault" | "sharing" | "protection" | "account";
 
 const MainPage = () => {
   const [activeSection, setActiveSection] = useState<Section>("vault");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { setCurrentPage } = usePage();
+  const { latestAuth, latestSetAuth } = useAuth();
+  const { vault, setVault } = useVault();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const initVault = async () => {
+      try {
+        if (!latestAuth.current.token) {
+          await setToken(latestAuth.current, latestSetAuth.current);
+        }
+        if (latestAuth.current.username && latestAuth.current.token != null) {
+          // console.log("DEBUG", latestAuth.current.username);
+          // console.log("DEBUG", latestAuth.current.token);
+          const { blob, iv } = await fetchVault(
+            latestAuth.current.username,
+            latestAuth.current.token,
+          );
+
+          if (blob && iv && latestAuth.current.encryptionKey) {
+            const data = await getDecryptedDataFromBlob(
+              blob,
+              iv,
+              latestAuth.current.encryptionKey,
+            );
+            setVault(data);
+            console.log("VAULT DATA:");
+            console.log(data);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch vault");
+        console.log(e);
+        setIsLoading(false);
+      }
+    };
+    initVault();
+  }, []);
+
   const handleLogout = () => {
     try {
       axios.post(
@@ -54,6 +98,7 @@ const MainPage = () => {
       <Navbar
         onMenuClick={() => {
           setIsSidebarOpen(!isSidebarOpen);
+          console.log(vault);
         }}
         handleLogout={handleLogout}
       />

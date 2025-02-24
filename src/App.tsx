@@ -5,7 +5,7 @@ import { useAuth } from "./components/Hooks/useAuth";
 import setToken from "./utils/setToken";
 import { usePage } from "./components/Hooks/usePage";
 import { PageType } from "./types/PageType";
-import MainPage from "./components/VaultPage/MainPage";
+import MainPage from "./components/MainPage/MainPage";
 import LandingPage from "./components/LandingPage/LandingPage";
 
 function App() {

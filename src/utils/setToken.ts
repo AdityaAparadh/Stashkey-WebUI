@@ -17,8 +17,6 @@ const setToken = async (
   auth: AuthState,
   setAuth: (auth: AuthState) => void,
 ): Promise<void> => {
-  // console.log(`setToken called`);
-  // console.log(auth);
   try {
     if (auth.isAuthenticated) {
       const res = await axios.post<RefreshResponse>(

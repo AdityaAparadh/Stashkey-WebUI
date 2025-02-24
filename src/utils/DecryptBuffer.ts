@@ -16,8 +16,8 @@ const DecryptBuffer = async (
 
   // console.log("Inside DecryptBuffer", typeof data);
   // console.log("Inside DecryptBuffer", data instanceof ArrayBuffer);
-  console.log("Inside DecryptBuffer", ivBuffer instanceof ArrayBuffer);
-  console.log("Inside DecryptBuffer", key instanceof CryptoKey);
+  // console.log("Inside DecryptBuffer", ivBuffer instanceof ArrayBuffer);
+  // console.log("Inside DecryptBuffer", key instanceof CryptoKey);
 
   const decryptedBuffer = await window.crypto.subtle.decrypt(
     {
