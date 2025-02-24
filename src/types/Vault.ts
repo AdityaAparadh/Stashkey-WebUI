@@ -12,7 +12,7 @@ export interface Vault {
   /**
    * Timestamp of the Last write to the vault
    */
-  lastModifier: Date;
+  lastModified: Date;
 
   /**
    * The public key of the user, reserved for future use

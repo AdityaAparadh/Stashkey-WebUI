@@ -3,6 +3,7 @@
  * @param {string} password
  * @param {string} salt
  * @param {number} iterations
+ * @param {boolean} exportable
  * @returns {Promise<CryptoKey>}
  */
 

@@ -3,6 +3,17 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  build: {
+    target: "esnext",
+    rollupOptions: {
+      external: ["bson"],
+    },
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: "esnext",
+    },
+  },
   plugins: [react()],
   resolve: {
     alias: {
@@ -17,6 +28,5 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
-    // setupFiles: ["./src/test/setup.ts"], // optional
   },
 });
