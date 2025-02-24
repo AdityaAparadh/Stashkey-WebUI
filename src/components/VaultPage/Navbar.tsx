@@ -4,9 +4,10 @@ import { Button } from "../ui/button";
 
 interface NavbarProps {
   onMenuClick: () => void;
+  handleLogout: () => void;
 }
 
-const Navbar = ({ onMenuClick }: NavbarProps) => {
+const Navbar = ({ onMenuClick, handleLogout }: NavbarProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 border-b bg-background">
       <div className="container px-4 sm:px-6 mx-auto">
@@ -29,7 +30,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium">aditya</span>
             <ThemeToggle />
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

@@ -1,17 +1,38 @@
 import { useState } from "react";
 import Navbar from "./Navbar";
 import { Button } from "../ui/button";
-import { Shield, Share2, User, KeyRound } from "lucide-react";
+import { Shield, Share2, User, KeyRound, Pi } from "lucide-react";
 import { VaultSection } from "./sections/VaultSection/VaultSection";
 import { SharingSection } from "./sections/SharingSection/SharingSection";
 import { ProtectionSection } from "./sections/ProtectionSection/ProtectionSection";
 import { AccountSection } from "./sections/AccountSection/AccountSection";
-
+import config from "../../config";
+import axios from "axios";
+import { usePage } from "../Hooks/usePage";
+import { PageType } from "@/types/PageType";
 type Section = "vault" | "sharing" | "protection" | "account";
 
 const MainPage = () => {
   const [activeSection, setActiveSection] = useState<Section>("vault");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { setCurrentPage } = usePage();
+  const handleLogout = () => {
+    try {
+      axios.post(
+        `${config.BACKEND_URI}/auth/logout`,
+        {},
+        { withCredentials: true },
+      );
+
+      /**
+       * @todo Remove any state stored in localStorage
+       */
+      setCurrentPage(PageType.AUTHPAGE);
+    } catch (e) {
+      console.error("Failed to log out");
+      console.error(e);
+    }
+  };
 
   const renderSection = () => {
     switch (activeSection) {
@@ -30,7 +51,13 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <Navbar
+        onMenuClick={() => {
+          setIsSidebarOpen(!isSidebarOpen);
+        }}
+        handleLogout={handleLogout}
+      />
+
       <div className="pt-14 sm:pt-16 flex">
         {/* Sidebar */}
         <div

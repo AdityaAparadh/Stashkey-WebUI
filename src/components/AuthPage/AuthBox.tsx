@@ -22,6 +22,7 @@ import { PageType } from "@/types/PageType";
 import { Vault } from "@/types/Vault";
 import { getEncryptedBlobAndIV } from "@/utils/Blob";
 import { handleError } from "@/utils/error";
+import setToken from "@/utils/setToken";
 
 /**
  * The Login Form Component. Tight coupling with AuthBox.
@@ -31,7 +32,7 @@ const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
-  const { auth, setAuth } = useAuth();
+  const { auth, setAuth, latestAuth, latestSetAuth } = useAuth();
   const { setCurrentPage } = usePage();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -79,6 +80,7 @@ const LoginForm = () => {
         username,
       });
 
+      setToken(latestAuth.current, latestSetAuth.current);
       setCurrentPage(PageType.MAINPAGE);
     } catch (err) {
       handleError(err, setStatus);
