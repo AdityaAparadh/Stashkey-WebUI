@@ -19,6 +19,7 @@ import {
   CopyCheck,
   Plus,
   Minus,
+  Trash2,
 } from "lucide-react";
 import {
   Select,
@@ -128,6 +129,18 @@ export const CardDetails = ({ card, onClose }: CardDetailsProps) => {
     setIsEditing(false);
   };
 
+  const handleDelete = () => {
+    if (!window.confirm("Are you sure you want to delete this card?")) {
+      return;
+    }
+    if (!vault) return;
+    const newVaultData = vault.vaultData?.filter(
+      (record) => record.uuid !== card.uuid,
+    );
+    updateVaultData(newVaultData as any);
+    onClose();
+  };
+
   const renderCopyButton = (text: string) => {
     if (!isEditing) {
       return <CopyButton text={text} />;
@@ -143,7 +156,7 @@ export const CardDetails = ({ card, onClose }: CardDetailsProps) => {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="mb-4">
           <DialogTitle>Card Details</DialogTitle>
         </DialogHeader>
@@ -231,7 +244,6 @@ export const CardDetails = ({ card, onClose }: CardDetailsProps) => {
                 <div className="flex items-center gap-2">
                   <Input
                     id="expirationYear-details"
-                    // Use text type to remove native spinner arrows
                     type="text"
                     value={formData.expirationYear.toString()}
                     onChange={(e) => {
@@ -392,6 +404,14 @@ export const CardDetails = ({ card, onClose }: CardDetailsProps) => {
                   className="h-8 w-8"
                 >
                   <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleDelete}
+                  className="h-8 w-8"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
                 <Button
                   type="button"

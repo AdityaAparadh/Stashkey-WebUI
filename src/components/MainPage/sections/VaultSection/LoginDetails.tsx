@@ -9,7 +9,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Eye, EyeOff, Edit, Save, X, Copy, CopyCheck } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Edit,
+  Save,
+  X,
+  Copy,
+  CopyCheck,
+  Trash2, // imported for delete action
+} from "lucide-react";
 import { useVault } from "@/components/Hooks/useVault";
 import type { Login } from "@/types/Login";
 
@@ -126,6 +135,19 @@ export const LoginDetails = ({ login, onClose }: LoginDetailsProps) => {
     setIsEditing(false);
   };
 
+  const handleDelete = () => {
+    // Ask for confirmation
+    if (!window.confirm("Are you sure you want to delete this login?")) {
+      return;
+    }
+    if (!vault) return;
+    const newVaultData = vault.vaultData?.filter(
+      (record) => record.uuid !== login.uuid,
+    );
+    updateVaultData(newVaultData as any);
+    onClose();
+  };
+
   const renderCopyButton = (text: string) => {
     if (!isEditing) {
       return <CopyButton text={text} />;
@@ -135,7 +157,7 @@ export const LoginDetails = ({ login, onClose }: LoginDetailsProps) => {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="mb-4">
           <DialogTitle>Login Details</DialogTitle>
         </DialogHeader>
@@ -289,6 +311,14 @@ export const LoginDetails = ({ login, onClose }: LoginDetailsProps) => {
                   className="h-8 w-8"
                 >
                   <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleDelete}
+                  className="h-8 w-8"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
                 <Button
                   type="button"

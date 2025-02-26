@@ -69,6 +69,11 @@ const MainPage = () => {
       );
 
       /**
+       * Ah yes, a SPA
+       */
+      window.location.reload();
+
+      /**
        * @todo Remove any state stored in localStorage
        */
       setCurrentPage(PageType.AUTHPAGE);

@@ -2,7 +2,7 @@ import { ThemeToggle } from "../Commons/ThemeToggle";
 import { LockKeyhole, LogOut, Menu } from "lucide-react";
 import { Button } from "../ui/button";
 import { useAuth } from "../Hooks/useAuth";
-
+import logo from "../../assets/logo.png";
 interface NavbarProps {
   onMenuClick: () => void;
   handleLogout: () => void;
@@ -24,10 +24,12 @@ const Navbar = ({ onMenuClick, handleLogout }: NavbarProps) => {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <LockKeyhole className="h-5 w-5 sm:h-6 sm:w-6" />
+
+            <img src={logo} alt="Stashkey" className="h-5"></img>
+            {/* <LockKeyhole className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="font-semibold text-lg sm:text-xl hidden sm:inline">
               Stashkey
-            </span>
+            </span> */}
           </div>
 
           <div className="flex items-center gap-4">

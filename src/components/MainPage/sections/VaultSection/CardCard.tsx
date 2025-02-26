@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { Card } from "@/types/Card";
 import { CardType } from "@/types/Card";
 import { cn } from "@/lib/utils";
@@ -80,96 +81,147 @@ interface CardCardProps {
   className?: string;
 }
 
+/*
+  Here’s what we do:
+  • The card’s “base” design size is 340px (width) × 215px (height). (This ratio is close to 3.375 : 2.125.)
+  • A wrapper div has a max-width of 340px and is set to the same aspect ratio.
+  • Inside, we have an inner container fixed at 340x215 that is scaled down/up via CSS transform.
+  • A ResizeObserver computes the current wrapper width and sets a CSS variable --scale = currentWidth / 340.
+  • Because every size (including fonts) is defined relative to the base (px sizes), the entire card scales uniformly.
+*/
 export const CardCard = ({ card, onClick, className }: CardCardProps) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  // Define the base dimensions that you designed for.
+  const baseWidth = 400;
+  const baseHeight = 215;
   const themeColor = getCardThemeColor(card.cardType);
   const blobPositions = getBlobPositions(card.cardType);
 
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+    // Create a ResizeObserver to update the scale factor.
+    const resizeObserver = new ResizeObserver((entries) => {
+      // There will be one observed entry – the wrapper.
+      for (let entry of entries) {
+        const width = entry.contentRect.width;
+        const scale = width / baseWidth;
+        if (wrapperRef.current) {
+          wrapperRef.current.style.setProperty("--scale", scale.toString());
+        }
+      }
+    });
+    resizeObserver.observe(wrapperRef.current);
+    return () => resizeObserver.disconnect();
+  }, [baseWidth]);
+
   return (
-    <UICard
-      onClick={onClick}
-      className={cn(
-        "w-full max-w-sm mx-auto relative overflow-hidden cursor-pointer transition-all",
-        "hover:shadow-lg border border-opacity-30",
-        "bg-white/40 dark:bg-black/30 backdrop-blur-xl",
-        "shadow-sm hover:shadow-md",
-        className,
-      )}
+    <div
+      ref={wrapperRef}
+      // This wrapper always has the correct aspect ratio (baseWidth:baseHeight) and
+      // prevents the outer container from causing distortions.
+      className="relative w-full max-w-[340px] overflow-visible"
+      style={{ aspectRatio: `${baseWidth} / ${baseHeight}` }}
     >
-      {/* Background gradient with card brand colors */}
+      {/* The inner container is fixed at the base design size.
+          All design elements (including font sizes) are based on these dimensions.
+          The entire inner container scales uniformly via transform: scale(var(--scale)). */}
       <div
-        className={cn("absolute inset-0 bg-gradient-to-br", themeColor)}
-      ></div>
-
-      {/* CSS-based animated blobs */}
-      <div
-        className="absolute rounded-full opacity-70 blur-3xl bg-current animate-blob-pulse-slow"
+        className="absolute top-0 left-0 origin-top-left"
         style={{
-          top: blobPositions.blob1.top,
-          left: blobPositions.blob1.left,
-          width: blobPositions.blob1.size,
-          height: blobPositions.blob1.size,
-          animationDelay: "0s",
+          width: baseWidth,
+          height: baseHeight,
+          transform: "scale(var(--scale))",
         }}
-      ></div>
-      <div
-        className="absolute rounded-full opacity-70 blur-3xl bg-current animate-blob-pulse-slow"
-        style={{
-          bottom: blobPositions.blob2.bottom,
-          right: blobPositions.blob2.right,
-          width: blobPositions.blob2.size,
-          height: blobPositions.blob2.size,
-          animationDelay: "2s",
-        }}
-      ></div>
-      <div
-        className="absolute rounded-full opacity-70 blur-3xl bg-current animate-blob-pulse-slow"
-        style={{
-          top: blobPositions.blob3.top,
-          right: blobPositions.blob3.right,
-          width: blobPositions.blob3.size,
-          height: blobPositions.blob3.size,
-          animationDelay: "4s",
-        }}
-      ></div>
+      >
+        <UICard
+          onClick={onClick}
+          // All inner spacing, font sizes, etc. are defined relative to the base design.
+          className={cn(
+            "relative overflow-hidden cursor-pointer transition-all",
+            "hover:shadow-lg border border-opacity-30",
+            "bg-white/40 dark:bg-black/30 backdrop-blur-xl",
+            "shadow-sm hover:shadow-md",
+            className,
+          )}
+          style={{ width: baseWidth, height: baseHeight }}
+        >
+          {/* Background gradient with card brand colors */}
+          <div
+            className={cn("absolute inset-0 bg-gradient-to-br", themeColor)}
+          />
 
-      {/* Frosted glass overlay */}
-      <div className="absolute inset-0 bg-white/20 dark:bg-black/20 backdrop-blur-sm"></div>
+          {/* CSS-based animated blobs */}
+          <div
+            className="absolute rounded-full opacity-70 blur-3xl bg-current animate-blob-pulse-slow"
+            style={{
+              top: blobPositions.blob1.top,
+              left: blobPositions.blob1.left,
+              width: blobPositions.blob1.size,
+              height: blobPositions.blob1.size,
+              animationDelay: "0s",
+            }}
+          />
+          <div
+            className="absolute rounded-full opacity-70 blur-3xl bg-current animate-blob-pulse-slow"
+            style={{
+              bottom: blobPositions.blob2.bottom,
+              right: blobPositions.blob2.right,
+              width: blobPositions.blob2.size,
+              height: blobPositions.blob2.size,
+              animationDelay: "2s",
+            }}
+          />
+          <div
+            className="absolute rounded-full opacity-70 blur-3xl bg-current animate-blob-pulse-slow"
+            style={{
+              top: blobPositions.blob3.top,
+              right: blobPositions.blob3.right,
+              width: blobPositions.blob3.size,
+              height: blobPositions.blob3.size,
+              animationDelay: "4s",
+            }}
+          />
 
-      <CardContent className="p-6 relative z-10">
-        <div className="flex justify-between items-center">
-          {/* Display the logo based on the card type */}
-          <div className="text-xl font-medium tracking-tight font-sans">
-            {getCardProcessorLogo(card.cardType)}
-          </div>
-        </div>
+          {/* Frosted glass overlay */}
+          <div className="absolute inset-0 bg-white/20 dark:bg-black/20 backdrop-blur-sm" />
 
-        <div className="mt-6">
-          <p className="text-2xl tracking-widest font-mono">
-            {maskCardNumber(card.cardNumber)}
-          </p>
-        </div>
+          <CardContent className="p-6 relative z-10">
+            <div className="flex justify-between items-center">
+              {/* Display the logo based on the card type */}
+              <div className="text-xl font-medium tracking-tight font-sans">
+                {getCardProcessorLogo(card.cardType)}
+              </div>
+            </div>
 
-        <div className="mt-6 flex justify-between">
-          <div>
-            <p className="text-xs uppercase text-muted-foreground tracking-wide font-medium">
-              Card Holder
-            </p>
-            <p className="font-medium text-sm tracking-wide">
-              {card.cardHolder}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs uppercase text-muted-foreground tracking-wide font-medium">
-              Expires
-            </p>
-            <p className="font-medium text-sm tracking-wide">
-              {card.expirationMonth.toString().padStart(2, "0")}/
-              {card.expirationYear}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </UICard>
+            <div className="mt-6">
+              <p className="text-2xl tracking-widest font-mono">
+                {maskCardNumber(card.cardNumber)}
+              </p>
+            </div>
+
+            <div className="mt-6 flex justify-between">
+              <div>
+                <p className="text-xs uppercase text-muted-foreground tracking-wide font-medium">
+                  Card Holder
+                </p>
+                <p className="font-medium text-sm tracking-wide">
+                  {card.cardHolder}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs uppercase text-muted-foreground tracking-wide font-medium">
+                  Expires
+                </p>
+                <p className="font-medium text-sm tracking-wide">
+                  {card.expirationMonth.toString().padStart(2, "0")}/
+                  {card.expirationYear}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </UICard>
+      </div>
+    </div>
   );
 };
 

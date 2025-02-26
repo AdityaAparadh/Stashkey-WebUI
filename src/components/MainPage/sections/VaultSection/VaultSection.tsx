@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Fuse from "fuse.js";
 import { Input } from "@/components/ui/input";
 import { Search, Key, User, CreditCard, FileText, Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -10,6 +11,10 @@ import { LoginDetails } from "./LoginDetails";
 import { CardDetails } from "./CardDetails";
 import { AddLoginDialog } from "./AddLoginDialog";
 import AddCardDialog from "./AddCardDialog";
+import AddIdentityDialog from "./AddIdentityDialog";
+import IdentityDetails from "./IdentityDetails";
+import AddNoteDialog from "./AddNoteDialog";
+import NoteDetails from "./NoteDetails";
 import { useVault } from "@/components/Hooks/useVault";
 import { RecordType } from "@/types/Record";
 import type { Login } from "@/types/Login";
@@ -23,15 +28,24 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export const VaultSection = () => {
   const { vault } = useVault();
   const [selectedLogin, setSelectedLogin] = useState<
     (Login & { name?: string }) | null
   >(null);
+  const [selectedIdentity, setSelectedIdentity] = useState<Identity | null>(
+    null,
+  );
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [showAddLogin, setShowAddLogin] = useState(false);
+  const [showAddIdentity, setShowAddIdentity] = useState(false);
   const [showAddCard, setShowAddCard] = useState(false);
+  const [showAddNote, setShowAddNote] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("logins");
 
   if (!vault) {
     return <div className="p-4">Vault not found.</div>;
@@ -69,36 +83,83 @@ export const VaultSection = () => {
     return record.username;
   };
 
+  const filterRecords = <T,>(records: T[], keys: string[]): T[] => {
+    if (!searchQuery.trim()) return records;
+    const fuse = new Fuse(records, {
+      keys,
+      threshold: 0.4,
+    });
+    return fuse.search(searchQuery).map((result) => result.item);
+  };
+
+  const filteredLogins = filterRecords(loginRecords, [
+    "username",
+    "name",
+    "url",
+    "notes",
+  ]);
+  const filteredIdentities = filterRecords(identityRecords, [
+    "firstName",
+    "lastName",
+    "email",
+    "notes",
+  ]);
+  const filteredCards = filterRecords(cardRecords, [
+    "cardNumber",
+    "cardHolder",
+    "expiryDate",
+    "notes",
+    "cardType",
+  ]);
+  const filteredNotes = filterRecords(noteRecords, [
+    "title",
+    "content",
+    "notes",
+  ]);
+
   return (
     <div className="h-full flex flex-col gap-4 sm:gap-6">
+      {/* Search and Dropdown “Add Record” Button */}
       <div className="flex gap-2 items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search vault..." className="pl-9" />
+          <Input
+            placeholder={`Search ${activeTab}...`}
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        {/* Dropdown “Add Record” Button using lucide Plus icon */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="btn btn-outline">
+            <Button variant="outline" size="icon">
               <Plus className="w-4 h-4" />
-            </button>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onSelect={() => setShowAddLogin(true)}>
-              Add Login
+              Login
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setShowAddIdentity(true)}>
+              Identity
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setShowAddCard(true)}>
-              Add Card
+              Card
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => {}}>
-              Add Identity
+            <DropdownMenuItem onSelect={() => setShowAddNote(true)}>
+              Note
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => {}}>Add Note</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <Tabs defaultValue="logins" className="flex-1 flex flex-col">
+      {/* Tabs for each record type */}
+      <Tabs
+        defaultValue="logins"
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value)}
+        className="flex-1 flex flex-col"
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="logins" className="flex items-center gap-2">
             <Key className="w-4 h-4" />
@@ -110,21 +171,20 @@ export const VaultSection = () => {
           </TabsTrigger>
           <TabsTrigger value="cards" className="flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
-            <span className="hidden sm:inline">Credit Cards</span>
+            <span className="hidden sm:inline">Cards</span>
           </TabsTrigger>
           <TabsTrigger value="notes" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             <span className="hidden sm:inline">Notes</span>
           </TabsTrigger>
         </TabsList>
-
         {/* Logins Tab */}
         <TabsContent
           value="logins"
           className="flex-1 space-y-2 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
         >
-          {loginRecords.length > 0 ? (
-            loginRecords.map((record) => (
+          {filteredLogins.length > 0 ? (
+            filteredLogins.map((record) => (
               <LoginCard
                 key={record.uuid}
                 name={getLoginDisplayName(record)}
@@ -145,49 +205,58 @@ export const VaultSection = () => {
             </p>
           )}
         </TabsContent>
-
         {/* Identities Tab */}
         <TabsContent
           value="identities"
           className="flex-1 space-y-2 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
         >
-          {identityRecords.length > 0 ? (
-            identityRecords.map((record) => <IdentityCard key={record.uuid} />)
+          {filteredIdentities.length > 0 ? (
+            filteredIdentities.map((record) => (
+              <IdentityCard
+                key={record.uuid}
+                identity={record}
+                onClick={() => setSelectedIdentity(record)}
+              />
+            ))
           ) : (
             <p className="text-center text-muted-foreground">
               No identity records found
             </p>
           )}
         </TabsContent>
-
         {/* Cards Tab */}
         <TabsContent
           value="cards"
-          className="flex-1 space-y-4 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
+          className="flex-1 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
         >
-          {cardRecords.length > 0 ? (
-            cardRecords.map((record) => (
-              <CardCard
-                key={record.uuid}
-                card={record}
-                onClick={() => setSelectedCard(record)}
-              />
-            ))
+          {filteredCards.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 justify-items-center gap-y-4 gap-x-1">
+              {filteredCards.map((record) => (
+                <CardCard
+                  key={record.uuid}
+                  card={record}
+                  onClick={() => setSelectedCard(record)}
+                />
+              ))}
+            </div>
           ) : (
             <p className="text-center text-muted-foreground">
-              No credit card records found
+              No card records found
             </p>
           )}
         </TabsContent>
-
         {/* Notes Tab */}
         <TabsContent
           value="notes"
           className="flex-1 space-y-2 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
         >
-          {noteRecords.length > 0 ? (
-            noteRecords.map((record) => (
-              <NoteCard key={record.uuid} note={record} />
+          {filteredNotes.length > 0 ? (
+            filteredNotes.map((record) => (
+              <NoteCard
+                key={record.uuid}
+                note={record}
+                onClick={() => setSelectedNote(record)}
+              />
             ))
           ) : (
             <p className="text-center text-muted-foreground">
@@ -197,10 +266,18 @@ export const VaultSection = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Detail dialogs for each record type */}
       {selectedLogin && (
         <LoginDetails
           login={selectedLogin}
           onClose={() => setSelectedLogin(null)}
+        />
+      )}
+
+      {selectedIdentity && (
+        <IdentityDetails
+          identity={selectedIdentity}
+          onClose={() => setSelectedIdentity(null)}
         />
       )}
 
@@ -211,12 +288,31 @@ export const VaultSection = () => {
         />
       )}
 
+      {selectedNote && (
+        <NoteDetails
+          note={selectedNote}
+          onClose={() => setSelectedNote(null)}
+        />
+      )}
+
+      {/* Add Record dialogs */}
       {showAddLogin && (
         <AddLoginDialog open={showAddLogin} onOpenChange={setShowAddLogin} />
       )}
 
+      {showAddIdentity && (
+        <AddIdentityDialog
+          open={showAddIdentity}
+          onOpenChange={setShowAddIdentity}
+        />
+      )}
+
       {showAddCard && (
         <AddCardDialog open={showAddCard} onOpenChange={setShowAddCard} />
+      )}
+
+      {showAddNote && (
+        <AddNoteDialog open={showAddNote} onOpenChange={setShowAddNote} />
       )}
     </div>
   );
