@@ -1,6 +1,7 @@
 import { ThemeToggle } from "../Commons/ThemeToggle";
 import { LockKeyhole, LogOut, Menu } from "lucide-react";
 import { Button } from "../ui/button";
+import { useAuth } from "../Hooks/useAuth";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -8,6 +9,8 @@ interface NavbarProps {
 }
 
 const Navbar = ({ onMenuClick, handleLogout }: NavbarProps) => {
+  const { auth } = useAuth();
+
   return (
     <div className="fixed top-0 left-0 right-0 border-b bg-background">
       <div className="container px-4 sm:px-6 mx-auto">
@@ -28,7 +31,7 @@ const Navbar = ({ onMenuClick, handleLogout }: NavbarProps) => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium">aditya</span>
+            <span className="text-sm font-medium">{auth.username}</span>
             <ThemeToggle />
             <Button variant="outline" size="icon" onClick={handleLogout}>
               <LogOut className="h-5 w-5" />

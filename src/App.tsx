@@ -7,15 +7,15 @@ import { usePage } from "./components/Hooks/usePage";
 import { PageType } from "./types/PageType";
 import MainPage from "./components/MainPage/MainPage";
 import LandingPage from "./components/LandingPage/LandingPage";
-
+import config from "./config";
 function App() {
   /**
    * Periodically update the refresh token
    */
   const { latestAuth, latestSetAuth } = useAuth();
   useEffect(() => {
-    // const INTERVAL = config.REFRESH_TOKEN_INTERVAL * 60 * 1000;
-    const INTERVAL = 10 * 1000;
+    const INTERVAL = config.REFRESH_TOKEN_INTERVAL * 60 * 1000;
+    // const INTERVAL = 10 * 1000;
     const refreshToken = async () => {
       try {
         await setToken(latestAuth.current, latestSetAuth.current);

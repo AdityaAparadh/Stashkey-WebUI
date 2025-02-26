@@ -1,110 +1,225 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Key, User, CreditCard, FileText, Plus } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { LoginCard } from "./LoginCard";
 import { IdentityCard } from "./IdentityCard";
-import { CreditCardCard } from "./CreditCardCard";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CardCard } from "./CardCard";
+import { NoteCard } from "./NoteCard";
+import { LoginDetails } from "./LoginDetails";
+import { CardDetails } from "./CardDetails";
+import { AddLoginDialog } from "./AddLoginDialog";
+import AddCardDialog from "./AddCardDialog";
+import { useVault } from "@/components/Hooks/useVault";
+import { RecordType } from "@/types/Record";
+import type { Login } from "@/types/Login";
+import type { Identity } from "@/types/Identity";
+import type { Card } from "@/types/Card";
+import type { Note } from "@/types/Note";
 
-const mockLogins = [
-  {
-    id: "1",
-    name: "Google",
-    username: "user@gmail.com",
-    url: "google.com",
-    notes: "This is my personal Google account for all Google services",
-    modifiedAt: new Date(2024, 0, 15),
-  },
-  {
-    id: "2",
-    name: "GitHub",
-    username: "developer123",
-    url: "github.com",
-    notes: "Work GitHub account",
-    modifiedAt: new Date(2024, 0, 10),
-  },
-  {
-    id: "3",
-    name: "Netflix",
-    username: "netflix_user",
-    url: "netflix.com",
-    notes: "Family Netflix subscription",
-    modifiedAt: new Date(2024, 0, 5),
-  },
-  {
-    id: "4",
-    name: "Amazon",
-    username: "shopper@email.com",
-    url: "amazon.com",
-    notes: "Prime membership account",
-    modifiedAt: new Date(2024, 0, 1),
-  },
-  {
-    id: "5",
-    name: "Microsoft",
-    username: "msuser@outlook.com",
-    url: "microsoft.com",
-    notes: "Microsoft 365 account",
-    modifiedAt: new Date(2023, 11, 25),
-  },
-  {
-    id: "6",
-    name: "Portfolio",
-    username: "aditya.aparadh.0@gmail.com",
-    url: "aditya.software",
-    notes: "My personal portfolio site",
-    modifiedAt: new Date(2023, 11, 25),
-  },
-];
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
 export const VaultSection = () => {
+  const { vault } = useVault();
+  const [selectedLogin, setSelectedLogin] = useState<
+    (Login & { name?: string }) | null
+  >(null);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [showAddLogin, setShowAddLogin] = useState(false);
+  const [showAddCard, setShowAddCard] = useState(false);
+
+  if (!vault) {
+    return <div className="p-4">Vault not found.</div>;
+  }
+
+  const loginRecords = vault.vaultData
+    ? (vault.vaultData.filter(
+        (record) => record.recordType === RecordType.LOGIN,
+      ) as (Login & { name?: string })[])
+    : [];
+  const identityRecords = vault.vaultData
+    ? (vault.vaultData.filter(
+        (record) => record.recordType === RecordType.IDENTITY,
+      ) as Identity[])
+    : [];
+  const cardRecords = vault.vaultData
+    ? (vault.vaultData.filter(
+        (record) => record.recordType === RecordType.CARD,
+      ) as Card[])
+    : [];
+  const noteRecords = vault.vaultData
+    ? (vault.vaultData.filter(
+        (record) => record.recordType === RecordType.NOTE,
+      ) as Note[])
+    : [];
+
+  const getLoginDisplayName = (record: Login & { name?: string }): string => {
+    if (record.name && record.name.trim() !== "") return record.name;
+    if (record.url && record.url.length > 0) {
+      const domain = record.url[0]
+        .replace(/^(?:https?:\/\/)?(?:www\.)?/i, "")
+        .split(".")[0];
+      return domain.charAt(0).toUpperCase() + domain.slice(1);
+    }
+    return record.username;
+  };
+
   return (
     <div className="h-full flex flex-col gap-4 sm:gap-6">
-      {/* Search Section */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search vault..." className="pl-9" />
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search vault..." className="pl-9" />
+        </div>
+        {/* Dropdown “Add Record” Button using lucide Plus icon */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="btn btn-outline">
+              <Plus className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onSelect={() => setShowAddLogin(true)}>
+              Add Login
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setShowAddCard(true)}>
+              Add Card
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => {}}>
+              Add Identity
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => {}}>Add Note</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="logins" className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="logins">Logins</TabsTrigger>
-          <TabsTrigger value="identities">Identities</TabsTrigger>
-          <TabsTrigger value="cards">Credit Cards</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="logins" className="flex items-center gap-2">
+            <Key className="w-4 h-4" />
+            <span className="hidden sm:inline">Logins</span>
+          </TabsTrigger>
+          <TabsTrigger value="identities" className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            <span className="hidden sm:inline">Identities</span>
+          </TabsTrigger>
+          <TabsTrigger value="cards" className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            <span className="hidden sm:inline">Credit Cards</span>
+          </TabsTrigger>
+          <TabsTrigger value="notes" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">Notes</span>
+          </TabsTrigger>
         </TabsList>
 
-        {/* Login Records */}
+        {/* Logins Tab */}
         <TabsContent
           value="logins"
           className="flex-1 space-y-2 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
         >
-          {mockLogins.map((login) => (
-            <LoginCard
-              key={login.id}
-              name={login.name}
-              username={login.username}
-              url={login.url}
-              notes={login.notes}
-              modifiedAt={login.modifiedAt}
-            />
-          ))}
+          {loginRecords.length > 0 ? (
+            loginRecords.map((record) => (
+              <LoginCard
+                key={record.uuid}
+                name={getLoginDisplayName(record)}
+                username={record.username}
+                url={
+                  record.url && record.url.length > 0
+                    ? record.url[0]
+                    : undefined
+                }
+                notes={record.notes}
+                modifiedAt={record.modifiedAt}
+                onClick={() => setSelectedLogin(record)}
+              />
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground">
+              No login records found
+            </p>
+          )}
         </TabsContent>
 
-        {/* Identity Records */}
+        {/* Identities Tab */}
         <TabsContent
           value="identities"
           className="flex-1 space-y-2 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
         >
-          <IdentityCard />
+          {identityRecords.length > 0 ? (
+            identityRecords.map((record) => <IdentityCard key={record.uuid} />)
+          ) : (
+            <p className="text-center text-muted-foreground">
+              No identity records found
+            </p>
+          )}
         </TabsContent>
 
-        {/* Credit Card Records */}
+        {/* Cards Tab */}
         <TabsContent
           value="cards"
+          className="flex-1 space-y-4 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
+        >
+          {cardRecords.length > 0 ? (
+            cardRecords.map((record) => (
+              <CardCard
+                key={record.uuid}
+                card={record}
+                onClick={() => setSelectedCard(record)}
+              />
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground">
+              No credit card records found
+            </p>
+          )}
+        </TabsContent>
+
+        {/* Notes Tab */}
+        <TabsContent
+          value="notes"
           className="flex-1 space-y-2 overflow-y-auto mt-2 sm:mt-4 pr-2 sm:pr-4 -mr-2 sm:-mr-4"
         >
-          <CreditCardCard />
+          {noteRecords.length > 0 ? (
+            noteRecords.map((record) => (
+              <NoteCard key={record.uuid} note={record} />
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground">
+              No note records found
+            </p>
+          )}
         </TabsContent>
       </Tabs>
+
+      {selectedLogin && (
+        <LoginDetails
+          login={selectedLogin}
+          onClose={() => setSelectedLogin(null)}
+        />
+      )}
+
+      {selectedCard && (
+        <CardDetails
+          card={selectedCard}
+          onClose={() => setSelectedCard(null)}
+        />
+      )}
+
+      {showAddLogin && (
+        <AddLoginDialog open={showAddLogin} onOpenChange={setShowAddLogin} />
+      )}
+
+      {showAddCard && (
+        <AddCardDialog open={showAddCard} onOpenChange={setShowAddCard} />
+      )}
     </div>
   );
 };
+
+export default VaultSection;
