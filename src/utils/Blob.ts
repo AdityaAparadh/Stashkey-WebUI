@@ -1,4 +1,4 @@
-import { BSON } from "bson";
+import { BSON } from "./BSON";
 import EncryptBuffer from "./EncryptBuffer";
 import DecryptBuffer from "./DecryptBuffer";
 import { Vault } from "../types/Vault";
