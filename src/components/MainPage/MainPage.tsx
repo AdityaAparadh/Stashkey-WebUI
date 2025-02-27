@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import { Button } from "../ui/button";
-import { Shield, Share2, User, KeyRound, Dam } from "lucide-react";
+import { Shield, Share2, User, KeyRound } from "lucide-react";
 import { VaultSection } from "./sections/VaultSection/VaultSection";
 import { SharingSection } from "./sections/SharingSection/SharingSection";
 import { ProtectionSection } from "./sections/ProtectionSection/ProtectionSection";
@@ -23,10 +23,10 @@ const MainPage = () => {
   const { setCurrentPage } = usePage();
   const { latestAuth, latestSetAuth } = useAuth();
   const { vault, setVault } = useVault();
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
+    // setIsLoading(true);
     const initVault = async () => {
       try {
         if (!latestAuth.current.token) {
@@ -54,7 +54,7 @@ const MainPage = () => {
       } catch (e) {
         console.error("Failed to fetch vault");
         console.log(e);
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     };
     initVault();

@@ -25,7 +25,7 @@ export const LoginCard = ({
       const domain = cleanUrl.split("/")[0];
       return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
     } catch {
-      return null;
+      return undefined; 
     }
   };
   return (

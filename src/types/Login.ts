@@ -24,10 +24,10 @@ export interface Login extends Record {
   /**
    * Stores history of passwords used previously in this login
    */
-  passwordHistory: [Password];
+  passwordHistory: Password[];
 
   /**
    * Stores an array of urls for websites
    */
-  url: [string];
+  url: string[];
 }

@@ -1,5 +1,5 @@
 import { ThemeToggle } from "../Commons/ThemeToggle";
-import { LockKeyhole } from "lucide-react";
+// import { LockKeyhole } from "lucide-react";
 import logo from "../../assets/logo.png";
 
 const Navbar = () => {

@@ -27,5 +27,5 @@ export interface Vault {
   /**
    * Actual vault data, an array containing elements of type Record
    */
-  vaultData: [Record] | null;
+  vaultData: Record[] | null;
 }

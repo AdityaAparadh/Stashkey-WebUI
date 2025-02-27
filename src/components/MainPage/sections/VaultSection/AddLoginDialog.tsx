@@ -10,9 +10,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useVault } from "@/components/Hooks/useVault";
-import { RecordType } from "@/types/Record";
+import { Record, RecordType } from "@/types/Record";
 import type { Login } from "@/types/Login";
 
 interface AddLoginDialogProps {
@@ -77,7 +77,7 @@ export const AddLoginDialog = ({ open, onOpenChange }: AddLoginDialogProps) => {
     const newVaultData = vault.vaultData
       ? [...vault.vaultData, newLogin]
       : [newLogin];
-    updateVaultData(newVaultData as any);
+    updateVaultData(newVaultData as Record[]);
     setFormData({
       name: "",
       username: "",

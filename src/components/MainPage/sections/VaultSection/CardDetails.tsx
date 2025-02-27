@@ -352,7 +352,7 @@ export const CardDetails = ({ card, onClose }: CardDetailsProps) => {
               <Select
                 value={formData.cardType}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, cardType: value })
+                  setFormData({ ...formData, cardType: value as CardType }) 
                 }
               >
                 <SelectTrigger id="cardType-details" className="h-10">

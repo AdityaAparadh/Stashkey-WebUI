@@ -1,5 +1,5 @@
 import { ThemeToggle } from "../Commons/ThemeToggle";
-import { LockKeyhole, LogOut, Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { Button } from "../ui/button";
 import { useAuth } from "../Hooks/useAuth";
 import logo from "../../assets/logo.png";

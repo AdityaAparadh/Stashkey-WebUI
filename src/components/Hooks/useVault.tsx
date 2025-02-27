@@ -42,7 +42,7 @@ export const useVault = () => {
     }
   };
 
-  const updateVaultData = (records: [Record]) => {
+  const updateVaultData = (records: Record[]) => {
     if (!vault) return;
 
     setVault({

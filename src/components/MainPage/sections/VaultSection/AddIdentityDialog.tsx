@@ -68,6 +68,7 @@ export const AddIdentityDialog = ({
       ? [...vault.vaultData, newIdentity]
       : [newIdentity];
     updateVaultData(newVaultData);
+
     setFormData({
       firstName: "",
       lastName: "",
