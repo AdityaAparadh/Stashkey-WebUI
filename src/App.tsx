@@ -34,15 +34,13 @@ function App() {
 
   return (
     <>
-      <div className="">
-        {currentPage == PageType.AUTHPAGE ? (
-          <AuthPage />
-        ) : currentPage == PageType.MAINPAGE ? (
-          <MainPage />
-        ) : (
-          <LandingPage />
-        )}
-      </div>
+      {currentPage == PageType.AUTHPAGE ? (
+        <AuthPage />
+      ) : currentPage == PageType.MAINPAGE ? (
+        <MainPage />
+      ) : (
+        <LandingPage />
+      )}
     </>
   );
 }

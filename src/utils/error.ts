@@ -9,6 +9,10 @@ export const handleError = (
   if (axios.isAxiosError(err) && err.response) {
     switch (err.response.status) {
       case 400:
+        if (err.response.data == "Turnstile verification failed") {
+          setStatus("Capcha verification failed. Please try again");
+          break;
+        }
         setStatus("Bad Request. Please check your input");
         break;
       case 401:
